@@ -645,6 +645,27 @@ ovo #(.COLS(1), .LINES(1), .RGB(24'hFF00FF)) diff (
 // Core Controls
 //////////////////////////////////////////////
 
+// NOTE: this stuff might be really senstive to change... there are timing issues.
+reg [1:0] cont_key_2_reg =  'b1;
+reg [1:0] cont_key_3_reg =  'b1;
+reg [1:0] cont_key_4_reg =  'b0;
+reg [1:0] cont_key_5_reg =  'b0;
+reg [1:0] cont_key_8_reg =  'b1;
+reg [1:0] cont_key_9_reg =  'b1;
+reg [1:0] cont_key_14_reg = 'b1;
+reg [1:0] cont_key_15_reg = 'b1;
+
+always @(posedge clk_74a) begin
+    cont_key_2_reg <=  ~(cont1_key[2] | cont2_key[2]);
+    cont_key_3_reg <=  ~(cont1_key[3] | cont2_key[3]);
+    cont_key_4_reg <=   (cont1_key[4] | cont2_key[4]);
+    cont_key_5_reg <=   (cont1_key[5] | cont2_key[5]);
+    cont_key_8_reg <=  ~(cont1_key[8] | cont2_key[8]);
+    cont_key_9_reg <=  ~(cont1_key[9] | cont2_key[9]);
+    cont_key_14_reg <= ~(cont1_key[14] | cont2_key[14]);
+    cont_key_15_reg <= ~(cont1_key[15] | cont2_key[15]);
+end
+
 reg [7:0] dpad_thrust = 0;
 
 // 1 second = 50,000,000 cycles (duh)
@@ -656,10 +677,10 @@ always @(posedge clk_50) begin :thrust_count
 
 	if (thrust_count == 'd196_850) begin
 		thrust_count <= 0;
-		if ((cont1_key[5] | cont2_key[5]) && dpad_thrust > 0)
+		if (cont_key_5_reg && dpad_thrust > 0)
 			dpad_thrust <= dpad_thrust - 1'd1;
 
-		if ((cont1_key[4] | cont2_key[4]) && dpad_thrust < 'd254)
+		if (cont_key_4_reg && dpad_thrust < 'd254)
 			dpad_thrust <= dpad_thrust + 1'd1;
 	end
 end
@@ -667,12 +688,12 @@ end
 //4     5      6    7     8          9
 //Start,Select,Coin,Abort,Turn Right,Turn Left
 
-wire in_select = ~(cont1_key[14] | cont2_key[14]);
-wire in_start  = ~(cont1_key[15] | cont2_key[15]);
-wire in_turn_l = ~(cont1_key[2] | cont2_key[2]);
-wire in_turn_r = ~(cont1_key[3] | cont2_key[3]);
-wire in_coin   = ~(cont1_key[9] | cont2_key[9]);
-wire in_abort  = ~(cont1_key[8] | cont2_key[8]);
+wire in_select = cont_key_14_reg;
+wire in_start  = cont_key_15_reg;
+wire in_turn_l = cont_key_2_reg;
+wire in_turn_r = cont_key_3_reg;
+wire in_coin   = cont_key_9_reg;
+wire in_abort  = cont_key_8_reg;
 
 wire [7:0] in_thrust = dpad_thrust;
 

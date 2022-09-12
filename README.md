@@ -8,6 +8,7 @@
 ## Known Issues
 
 + DIP switches are not implemented.
++ No lamps for difficulty display.
 
 ## ROM Instructions
 
