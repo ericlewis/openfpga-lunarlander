@@ -570,7 +570,7 @@ reg [3:0] r2;
 reg [3:0] g2;
 reg [3:0] b2;
 
-always @(posedge clk_25) begin
+always @(posedge clk_50) begin
   r2 <= outr[7:5];
 	g2 <= outg[7:5];
   b2 <= outb[7:5];
@@ -645,29 +645,34 @@ ovo #(.COLS(1), .LINES(1), .RGB(24'hFF00FF)) diff (
 // Core Controls
 //////////////////////////////////////////////
 
-// NOTE: this stuff might be really senstive to change... there are timing issues.
-reg [1:0] cont_key_2_reg =  'b1;
-reg [1:0] cont_key_3_reg =  'b1;
-reg [1:0] cont_key_4_reg =  'b0;
-reg [1:0] cont_key_5_reg =  'b0;
-reg [1:0] cont_key_8_reg =  'b1;
-reg [1:0] cont_key_9_reg =  'b1;
-reg [1:0] cont_key_14_reg = 'b1;
-reg [1:0] cont_key_15_reg = 'b1;
-reg seed = 'd2;
+wire [15:0] cont1_key_s;
+wire [15:0] cont2_key_s;
 
-always @(posedge clk_74a) begin
-    cont_key_2_reg <=  ~(cont1_key[2] | cont2_key[2]);
-    cont_key_3_reg <=  ~(cont1_key[3] | cont2_key[3]);
-    cont_key_4_reg <=   (cont1_key[4] | cont2_key[4]);
-    cont_key_5_reg <=   (cont1_key[5] | cont2_key[5]);
-    cont_key_8_reg <=  ~(cont1_key[8] | cont2_key[8]);
-    cont_key_9_reg <=  ~(cont1_key[9] | cont2_key[9]);
-    cont_key_14_reg <= ~(cont1_key[14] | cont2_key[14]);
-    cont_key_15_reg <= ~(cont1_key[15] | cont2_key[15]);
-end
+synch_2 #(
+  .WIDTH(16)
+) cont1_s (
+  cont1_key,
+  cont1_key_s,
+  clk_6
+);
+
+synch_2 #(
+  .WIDTH(16)
+) cont2_s (
+  cont2_key,
+  cont2_key_s,
+  clk_6
+);
 
 reg [7:0] dpad_thrust = 0;
+
+synch_2 #(
+  .WIDTH(8)
+) thrust_s (
+  dpad_thrust,
+  in_thrust,
+  clk_6
+);
 
 // 1 second = 50,000,000 cycles (duh)
 // If we want to go from zero to full throttle in 1 second we tick every
@@ -678,10 +683,10 @@ always @(posedge clk_50) begin :thrust_count
 
 	if (thrust_count == 'd196_850) begin
 		thrust_count <= 0;
-		if (cont_key_5_reg && dpad_thrust > 0)
+		if ((cont1_key_s[5] | cont2_key_s[5]) && dpad_thrust > 0)
 			dpad_thrust <= dpad_thrust - 1'd1;
 
-		if (cont_key_4_reg && dpad_thrust < 'd254)
+		if ((cont1_key_s[4] | cont2_key_s[4]) && dpad_thrust < 'd254)
 			dpad_thrust <= dpad_thrust + 1'd1;
 	end
 end
@@ -689,14 +694,14 @@ end
 //4     5      6    7     8          9
 //Start,Select,Coin,Abort,Turn Right,Turn Left
 
-wire in_select = cont_key_14_reg;
-wire in_start  = cont_key_15_reg;
-wire in_turn_l = cont_key_2_reg;
-wire in_turn_r = cont_key_3_reg;
-wire in_coin   = cont_key_9_reg;
-wire in_abort  = cont_key_8_reg;
+wire in_select = ~(cont1_key_s[14] | cont2_key_s[14]);
+wire in_start  = ~(cont1_key_s[15] | cont2_key_s[15]);
+wire in_turn_l = ~(cont1_key_s[2]  | cont2_key_s[2]);
+wire in_turn_r = ~(cont1_key_s[3]  | cont2_key_s[3]);
+wire in_coin   = ~(cont1_key_s[9]  | cont2_key_s[9]);
+wire in_abort  = ~(cont1_key_s[8]  | cont2_key_s[8]);
 
-wire [7:0] in_thrust = dpad_thrust;
+wire [7:0] in_thrust;
 
 //////////////////////////////////////////////
 // Core Instance
