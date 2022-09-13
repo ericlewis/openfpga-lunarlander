@@ -523,7 +523,7 @@ data_loader_8 #(
   //
   // synchronize audio samples coming from the core
   wire	[31:0]	audgen_sampdata_s;
-  synch_3 #(.WIDTH(32)) s5(({audio, audio}), audgen_sampdata_s, audgen_sclk);
+  synch_3 #(.WIDTH(32)) s5(({1'b0, audio, 1'b0, audio}), audgen_sampdata_s, audgen_sclk);
   reg		[31:0]	audgen_sampshift;
   reg		[4:0]	audgen_lrck_cnt;
   reg				audgen_lrck;
@@ -570,10 +570,10 @@ reg [3:0] r2;
 reg [3:0] g2;
 reg [3:0] b2;
 
-always @(posedge clk_50) begin
-    r2 <= outr[7:5];
+always @(posedge clk_25) begin
+  r2 <= outr[7:5];
 	g2 <= outg[7:5];
-    b2 <= outb[7:5];
+  b2 <= outb[7:5];
 end
 
 ovo #(.COLS(1), .LINES(1), .RGB(24'hFF00FF)) diff (
@@ -654,6 +654,7 @@ reg [1:0] cont_key_8_reg =  'b1;
 reg [1:0] cont_key_9_reg =  'b1;
 reg [1:0] cont_key_14_reg = 'b1;
 reg [1:0] cont_key_15_reg = 'b1;
+reg seed = 'd2;
 
 always @(posedge clk_74a) begin
     cont_key_2_reg <=  ~(cont1_key[2] | cont2_key[2]);
