@@ -510,29 +510,6 @@ port map
 	address_b => am_bus(10 downto 0),
 	q_b       => rom_dout_3
 );
---  R3 : entity work.LLANDER_VEC_ROM1
---    port map (
---      clock    => CLK_6,
---      address  => am_bus(10 downto 0),
---      q        => rom_dout_1
---      );
---
---  NP3 : entity work.LLANDER_VEC_ROM2
---    port map (
---      clock    => CLK_6,
---      address  => am_bus(10 downto 0),
---      q        => rom_dout_2
---      );
---		
---  M3 : entity work.LLANDER_VEC_ROM3
---    port map (
---      clock    => CLK_6,
---      address  => am_bus(10 downto 0),
---      q        => rom_dout_3
---      );
-
-
-
 
   p_memory_data_mux : process(vram1_t1_l, vram2_t1_l, vrom1_t1_l, vrom2_t1_l, vrom3_t1_l,ram_dout_1, ram_dout_2, rom_dout_1, rom_dout_2,rom_dout_3)
   begin

@@ -103,8 +103,7 @@ architecture RTL of LLander is
   signal ena_3K               : std_ulogic;
   signal ena_12k					: std_ulogic;
   signal clk_3k					: std_ulogic;
-  signal clk_6K					: std_ulogic;
-  signal clk_12K					: std_ulogic;
+  signal clk_6k					: std_ulogic;
 
   -- cpu
   signal c_addr               : std_logic_vector(23 downto 0);
@@ -131,10 +130,8 @@ architecture RTL of LLander is
   signal dma_go_l             : std_logic;
   signal outck_l        		: std_logic;
   signal wdclr_l              : std_logic;
-  signal explode_l            : std_logic;
   signal dma_reset_l          : std_logic;
   signal audio_l              : std_logic;
-  signal noiserst_l           : std_logic;
   --
   signal shipthrusten         : std_logic;
   --
@@ -170,26 +167,16 @@ architecture RTL of LLander is
 
   signal noise_shift          : std_logic_vector(15 downto 0);
   signal noise                : std_logic;
-  signal shpsnd               : std_logic_vector(3 downto 0);
-  signal lifesnd					: std_logic_vector(3 downto 0);
 
 
-  signal lifeen					: std_logic;
   signal shpsnd_prefilter     : std_logic;
   signal shpsnd_filter_t1     : std_logic_vector(3 downto 0);
   signal shpsnd_filter_t2     : std_logic_vector(3 downto 0);
   signal shpsnd_filter_t3     : std_logic_vector(3 downto 0);
   signal shpsnd_filtered      : std_logic_vector(5 downto 0);
   signal expaud               : std_logic_vector(2 downto 0);
-  signal expitch              : std_logic_vector(1 downto 0);
-  signal noise_cnt            : std_logic_vector(3 downto 0);
-  signal expld_snd            : std_logic_vector(3 downto 0);
 
 
-  signal clkdiv2 					: std_logic_vector(3 downto 0);
-  signal audio_out2 				: std_logic_vector(7 downto 0);
-  
-  signal rom_cs					: std_logic;
   signal rom_0_cs					: std_logic;
   signal rom_1_cs					: std_logic;
   signal rom_2_cs					: std_logic;
@@ -232,6 +219,7 @@ rom_v_cs <= '1' when dn_addr(13) = '1'     else '0';
     end if;
 
     clk_3k <= ena_count(10);
+    clk_6k <= ena_count(9);
   end process;
 
   
@@ -367,7 +355,6 @@ rom_v_cs <= '1' when dn_addr(13) = '1'     else '0';
 		wdclr_l    	<= decc(2);
 		dma_reset_l	<= decc(4);
 		audio_l   	<= decc(6);
-		noiserst_l 	<= decc(7);
   end process;
   
   
@@ -498,36 +485,6 @@ port map
 	q_b       => rom3_dout
 );	  
 
---  Internal program ROMs if the FPGA is big enough	
---  rom0 : entity work.LLANDER_PROG_ROM_0
---    port map (
---      address    	=> c_addr(10 downto 0),
---      q        	=> rom0_dout,
---      clock       => CLK_6
---      );
---
---  rom1 : entity work.LLANDER_PROG_ROM_1
---    port map (
---      address     => c_addr(10 downto 0),
---      q        	=> rom1_dout,
---      clock       => CLK_6
---      );
---
---  rom2 : entity work.LLANDER_PROG_ROM_2
---    port map (
---      address     => c_addr(10 downto 0),
---      q        	=> rom2_dout,
---      clock       => CLK_6
---      );
---
---  rom3 : entity work.LLANDER_PROG_ROM_3
---    port map (
---      address     => c_addr(10 downto 0),
---      q        	=> rom3_dout,
---      clock       => CLK_6
---      );
-
---
   p_rom_mux : process(c_addr, rom0_dout, rom1_dout, rom2_dout, rom3_dout)
   begin
     rom_dout <= (others => '0');
