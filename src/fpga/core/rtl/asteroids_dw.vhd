@@ -425,7 +425,7 @@ begin
   end process;
   
   
-    video_rgb : work.dpram generic map (19,4)	
+    video_rgb : entity work.dpram generic map (19,4)
 port map
 (
 	clock_a   => clk_25,
