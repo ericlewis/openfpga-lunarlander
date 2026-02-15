@@ -309,6 +309,18 @@ assign vpll_feed = 1'bZ;
 // for bridge write data, we just broadcast it to all bus devices
 // for bridge read data, we have to mux it
 // add your own devices here
+
+// Interact variables
+reg [31:0] interact_zoom = 32'h0;
+
+always @(posedge clk_74a) begin
+    if (bridge_wr) begin
+        casex (bridge_addr)
+            32'h50000000: interact_zoom <= bridge_wr_data;
+        endcase
+    end
+end
+
 always @(*) begin
     casex(bridge_addr)
     default: begin
@@ -318,6 +330,9 @@ always @(*) begin
         // example
         // bridge_rd_data <= example_device_data;
         bridge_rd_data <= 0;
+    end
+    32'h50000000: begin
+        bridge_rd_data <= interact_zoom;
     end
     32'hF8xxxxxx: begin
         bridge_rd_data <= cmd_bridge_rd_data;
@@ -766,7 +781,8 @@ LLANDER_TOP LLANDER_TOP
 	.VID_HBLANK(hblank),
 	.VID_VBLANK(vblank_lunarlander),
 	.DIP(m_dip),
-	.RESET_L (reset_n),	
+	.ZOOM(interact_zoom[1:0]),
+	.RESET_L (reset_n),
 	.clk_6(clk_6),
 	.clk_25(clk_25)
 );

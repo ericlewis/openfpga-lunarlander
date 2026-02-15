@@ -67,6 +67,8 @@ entity ASTEROIDS_DW is
     BEAM_ON          : in    std_logic;
     BEAM_ENA         : in    std_logic;
 
+    ZOOM             : in    std_logic_vector(1 downto 0);
+
     VIDEO_R_OUT      : out   std_logic_vector(3 downto 0);
     VIDEO_G_OUT      : out   std_logic_vector(3 downto 0);
     VIDEO_B_OUT      : out   std_logic_vector(3 downto 0);
@@ -125,9 +127,8 @@ architecture RTL of ASTEROIDS_DW is
   signal pxcount					: std_logic_vector(8 downto 0);
   signal vram_wren				: std_logic;
 
-
-
-  
+  signal X_Read					: std_logic_vector(8 downto 0);
+  signal Y_Read					: std_logic_vector(8 downto 0);
 
 begin
 
@@ -317,7 +318,31 @@ begin
 
   end process;
 
-  up_addr <= (Y_Vid(8 downto 0) & X_Vid(8 downto 0));
+  -- Zoom: remap read addresses to display a cropped/enlarged portion of the framebuffer.
+  -- Small zoom (~1.14x): pixel * 7/8 + 32 => reads 448 pixels from 32..480
+  -- Large zoom (~1.33x): pixel * 3/4 + 64 => reads 384 pixels from 64..448
+  zoom_addr : process(X_Vid, Y_Vid, ZOOM)
+    variable x_shift : std_logic_vector(8 downto 0);
+    variable y_shift : std_logic_vector(8 downto 0);
+  begin
+    case ZOOM is
+      when "01" =>
+        x_shift := "000" & X_Vid(8 downto 3);
+        y_shift := "000" & Y_Vid(8 downto 3);
+        X_Read <= (X_Vid - x_shift) + 32;
+        Y_Read <= (Y_Vid - y_shift) + 32;
+      when "10" | "11" =>
+        x_shift := "00" & X_Vid(8 downto 2);
+        y_shift := "00" & Y_Vid(8 downto 2);
+        X_Read <= (X_Vid - x_shift) + 64;
+        Y_Read <= (Y_Vid - y_shift) + 64;
+      when others =>
+        X_Read <= X_Vid;
+        Y_Read <= Y_Vid;
+    end case;
+  end process;
+
+  up_addr <= (Y_Read & X_Read);
   
   clear_ram : process(clk_25, RESET)
 	variable state 				: integer range 0 to 4;

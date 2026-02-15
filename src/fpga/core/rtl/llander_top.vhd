@@ -99,6 +99,8 @@ entity LLANDER_TOP is
 
     DIP               : in    std_logic_vector(7 downto 0);
 
+    ZOOM              : in    std_logic_vector(1 downto 0);
+
     RESET_L           : in    std_logic;
 
     -- ref clock in
@@ -197,6 +199,8 @@ begin
 
       BEAM_ON     => beam_on,
       BEAM_ENA    => beam_ena,
+
+      ZOOM        => ZOOM,
 
       VIDEO_R_OUT => VIDEO_R_OUT,
       VIDEO_G_OUT => VIDEO_G_OUT,
