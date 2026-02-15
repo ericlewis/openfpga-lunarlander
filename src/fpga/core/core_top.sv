@@ -331,6 +331,9 @@ always @(*) begin
         // bridge_rd_data <= example_device_data;
         bridge_rd_data <= 0;
     end
+    32'h50000000: begin
+        bridge_rd_data <= interact_zoom;
+    end
     32'hF8xxxxxx: begin
         bridge_rd_data <= cmd_bridge_rd_data;
     end
