@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Compile with Quartus
         uses: raetro/quartus-flow@v1
@@ -30,6 +32,36 @@ jobs:
               f.write(reversed_data)
           PYEOF
 
+      - name: Compute version
+        id: version
+        run: |
+          LAST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+          if [ -z "$LAST_TAG" ]; then
+            NEXT_VERSION="1.0.0"
+          else
+            VERSION="${LAST_TAG#v}"
+            MAJOR=$(echo "$VERSION" | cut -d. -f1)
+            MINOR=$(echo "$VERSION" | cut -d. -f2)
+            PATCH=$(echo "$VERSION" | cut -d. -f3)
+            PATCH=$((PATCH + 1))
+            NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          fi
+          echo "version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Stamp version into core.json
+        run: |
+          python3 << PYEOF
+          import json, datetime
+          with open('dist/Cores/ericlewis.LunarLander/core.json', 'r') as f:
+              data = json.load(f)
+          data['core']['metadata']['version'] = '${{ steps.version.outputs.version }}'
+          data['core']['metadata']['date_release'] = datetime.date.today().isoformat()
+          with open('dist/Cores/ericlewis.LunarLander/core.json', 'w') as f:
+              json.dump(data, f, indent=4)
+              f.write('\n')
+          PYEOF
+
       - name: Package core
         run: |
           mkdir -p release/Cores/ericlewis.LunarLander
@@ -43,5 +75,20 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: LunarLander-core
+          name: LunarLander-${{ steps.version.outputs.version }}
           path: release/
+
+      - name: Create release zip
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        working-directory: release
+        run: zip -r ../ericlewis.LunarLander-${{ steps.version.outputs.version }}.zip .
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            "ericlewis.LunarLander-${{ steps.version.outputs.version }}.zip" \
+            --title "Lunar Lander ${{ steps.version.outputs.tag }}" \
+            --generate-notes
