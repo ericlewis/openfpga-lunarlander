@@ -22,13 +22,13 @@ jobs:
 
       - name: Reverse bitstream
         run: |
-          python3 -c "
+          python3 << 'PYEOF'
           with open('src/fpga/output_files/ap_core.rbf', 'rb') as f:
               data = f.read()
-          reversed = bytes(int('{:08b}'.format(b)[::-1], 2) for b in data)
+          reversed_data = bytes(int('{:08b}'.format(b)[::-1], 2) for b in data)
           with open('src/fpga/output_files/bitstream.rbf_r', 'wb') as f:
-              f.write(reversed)
-          "
+              f.write(reversed_data)
+          PYEOF
 
       - name: Package core
         run: |
