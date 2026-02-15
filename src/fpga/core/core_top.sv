@@ -311,12 +311,12 @@ assign vpll_feed = 1'bZ;
 // add your own devices here
 
 // Interact variables
-reg [31:0] interact_zoom = 32'h0;
+reg [1:0] interact_zoom = 2'b0;
 
 always @(posedge clk_74a) begin
     if (bridge_wr) begin
         casex (bridge_addr)
-            32'h50000000: interact_zoom <= bridge_wr_data;
+            32'h50000000: interact_zoom <= bridge_wr_data[1:0];
         endcase
     end
 end
@@ -330,9 +330,6 @@ always @(*) begin
         // example
         // bridge_rd_data <= example_device_data;
         bridge_rd_data <= 0;
-    end
-    32'h50000000: begin
-        bridge_rd_data <= interact_zoom;
     end
     32'hF8xxxxxx: begin
         bridge_rd_data <= cmd_bridge_rd_data;
@@ -781,7 +778,7 @@ LLANDER_TOP LLANDER_TOP
 	.VID_HBLANK(hblank),
 	.VID_VBLANK(vblank_lunarlander),
 	.DIP(m_dip),
-	.ZOOM(interact_zoom[1:0]),
+	.ZOOM(interact_zoom),
 	.RESET_L (reset_n),
 	.clk_6(clk_6),
 	.clk_25(clk_25)
