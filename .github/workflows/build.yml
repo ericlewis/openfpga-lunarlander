@@ -1,0 +1,47 @@
+name: Build Core
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile with Quartus
+        uses: raetro/quartus-flow@v1
+        with:
+          project: ap_core
+          version: pocket
+          project_folder: src/fpga
+
+      - name: Reverse bitstream
+        run: |
+          python3 -c "
+          with open('src/fpga/output_files/ap_core.rbf', 'rb') as f:
+              data = f.read()
+          reversed = bytes(int('{:08b}'.format(b)[::-1], 2) for b in data)
+          with open('src/fpga/output_files/bitstream.rbf_r', 'wb') as f:
+              f.write(reversed)
+          "
+
+      - name: Package core
+        run: |
+          mkdir -p release/Cores/ericlewis.LunarLander
+          cp src/fpga/output_files/bitstream.rbf_r release/Cores/ericlewis.LunarLander/
+          cp -r dist/Cores/ericlewis.LunarLander/*.json release/Cores/ericlewis.LunarLander/
+          cp dist/Cores/ericlewis.LunarLander/icon.bin release/Cores/ericlewis.LunarLander/
+          cp dist/Cores/ericlewis.LunarLander/info.txt release/Cores/ericlewis.LunarLander/
+          cp -r dist/Assets release/
+          cp -r dist/Platforms release/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LunarLander-core
+          path: release/
