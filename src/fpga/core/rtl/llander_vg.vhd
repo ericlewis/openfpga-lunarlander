@@ -474,7 +474,7 @@ rom_v_0_cs <= '1' when dn_addr(12 downto 11) = "00"     else '0';
 rom_v_1_cs <= '1' when dn_addr(12 downto 11) = "01"     else '0';
 rom_v_2_cs <= '1' when dn_addr(12 downto 11) = "10"     else '0';
 
-u_vector_rom_0 : work.dpram generic map (11,8)
+u_vector_rom_0 : entity work.dpram generic map (11,8)
 port map
 (
 	clock_a   => Clk_25,
@@ -486,7 +486,7 @@ port map
 	address_b => am_bus(10 downto 0),
 	q_b       => rom_dout_1
 );
-u_vector_rom_1 : work.dpram generic map (11,8)
+u_vector_rom_1 : entity work.dpram generic map (11,8)
 port map
 (
 	clock_a   => Clk_25,
@@ -498,7 +498,7 @@ port map
 	address_b => am_bus(10 downto 0),
 	q_b       => rom_dout_2
 );
-u_vector_rom_2 : work.dpram generic map (11,8)
+u_vector_rom_2 : entity work.dpram generic map (11,8)
 port map
 (
 	clock_a   => Clk_25,

@@ -436,7 +436,7 @@ rom_v_cs <= '1' when dn_addr(13) = '1'     else '0';
     end case;
   end process;
 
-rom0 : work.dpram generic map (11,8)
+rom0 : entity work.dpram generic map (11,8)
 port map
 (
 	clock_a   => Clk_25,
@@ -448,7 +448,7 @@ port map
 	address_b => c_addr(10 downto 0),
 	q_b       => rom0_dout
 );	  
-rom1 : work.dpram generic map (11,8)
+rom1 : entity work.dpram generic map (11,8)
 port map
 (
 	clock_a   => Clk_25,
@@ -460,7 +460,7 @@ port map
 	address_b => c_addr(10 downto 0),
 	q_b       => rom1_dout
 );	  
-rom2 : work.dpram generic map (11,8)
+rom2 : entity work.dpram generic map (11,8)
 port map
 (
 	clock_a   => Clk_25,
@@ -472,7 +472,7 @@ port map
 	address_b => c_addr(10 downto 0),
 	q_b       => rom2_dout
 );	  
-rom3 : work.dpram generic map (11,8)
+rom3 : entity work.dpram generic map (11,8)
 port map
 (
 	clock_a   => Clk_25,
