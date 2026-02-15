@@ -681,6 +681,16 @@ synch_2 #(
 
 reg [7:0] dpad_thrust = 0;
 
+wire [1:0] interact_zoom_s;
+
+synch_2 #(
+  .WIDTH(2)
+) zoom_s (
+  interact_zoom,
+  interact_zoom_s,
+  clk_25
+);
+
 synch_2 #(
   .WIDTH(8)
 ) thrust_s (
@@ -781,7 +791,7 @@ LLANDER_TOP LLANDER_TOP
 	.VID_HBLANK(hblank),
 	.VID_VBLANK(vblank_lunarlander),
 	.DIP(m_dip),
-	.ZOOM(interact_zoom),
+	.ZOOM(interact_zoom_s),
 	.RESET_L (reset_n),
 	.clk_6(clk_6),
 	.clk_25(clk_25)
