@@ -311,12 +311,12 @@ assign vpll_feed = 1'bZ;
 // add your own devices here
 
 // Interact variables
-reg [31:0] interact_zoom = 32'h0;
+reg [1:0] interact_zoom = 2'b0;
 
 always @(posedge clk_74a) begin
     if (bridge_wr) begin
         casex (bridge_addr)
-            32'h50000000: interact_zoom <= bridge_wr_data;
+            32'h50000000: interact_zoom <= bridge_wr_data[1:0];
         endcase
     end
 end
@@ -681,6 +681,16 @@ synch_2 #(
 
 reg [7:0] dpad_thrust = 0;
 
+wire [1:0] interact_zoom_s;
+
+synch_2 #(
+  .WIDTH(2)
+) zoom_s (
+  interact_zoom,
+  interact_zoom_s,
+  clk_25
+);
+
 synch_2 #(
   .WIDTH(8)
 ) thrust_s (
@@ -781,7 +791,7 @@ LLANDER_TOP LLANDER_TOP
 	.VID_HBLANK(hblank),
 	.VID_VBLANK(vblank_lunarlander),
 	.DIP(m_dip),
-	.ZOOM(interact_zoom[1:0]),
+	.ZOOM(interact_zoom_s),
 	.RESET_L (reset_n),
 	.clk_6(clk_6),
 	.clk_25(clk_25)
