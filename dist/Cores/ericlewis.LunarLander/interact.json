@@ -1,23 +1,7 @@
 {
     "interact": {
         "magic": "APF_VER_1",
-        "variables": [
-            {
-                "name": "Screen Zoom",
-                "id": 0,
-                "type": "list",
-                "enabled": true,
-                "persist": true,
-                "address": "0x50000000",
-                "writeonly": true,
-                "defaultval": 0,
-                "options": [
-                    {"value": 0, "name": "Off"},
-                    {"value": 1, "name": "Small"},
-                    {"value": 2, "name": "Large"}
-                ]
-            }
-        ],
+        "variables": [],
         "messages": []
     }
 }

@@ -175,7 +175,9 @@ begin
     if (RESET = '1') then
       pcount <= (others => '0');
       lcount <= (others => '0');
-		dcount <= (others => '0');		
+		dcount <= (others => '0');
+		pxcount <= (others => '0');
+		raster_active <= '0';
     elsif rising_edge(clk_25) then
       if hterm then
         pcount <= (others => '0');
@@ -310,7 +312,7 @@ begin
       VIDEO_G_OUT <= "0000";
       VIDEO_B_OUT <= "0000";
     end if;
-	 VID_DE <= not(v_blank or h_blank);
+	 VID_DE <= raster_active and not(v_blank or h_blank);
     VSYNC_OUT <= v_sync;
     HSYNC_OUT <= h_sync;
 	 VID_HBLANK <= h_blank;

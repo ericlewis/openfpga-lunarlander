@@ -642,7 +642,7 @@ ovo #(.COLS(1), .LINES(1), .RGB(24'hFF00FF)) diff (
     video_de_reg <= 0;
     video_rgb_reg <= 24'h0;
 
-    if (~(ovblank || ohblank)) begin
+    if (ode) begin
       video_de_reg <= 1;
 
       video_rgb_reg[23:16] <= {2{r2}};
@@ -679,7 +679,10 @@ synch_2 #(
   clk_6
 );
 
-reg [7:0] dpad_thrust = 0;
+// The original thrust lever idles near 0xFE and moves down toward 0x00 as
+// thrust increases, so the digital emulation needs the same polarity.
+reg [7:0] dpad_thrust = 8'd254;
+int thrust_counter = 0;
 
 wire [1:0] interact_zoom_s;
 
@@ -702,17 +705,21 @@ synch_2 #(
 // 1 second = 50,000,000 cycles (duh)
 // If we want to go from zero to full throttle in 1 second we tick every
 // 196,850 cycles.
-always @(posedge clk_50) begin :thrust_count
-	int thrust_count;
-	thrust_count <= thrust_count + 1'd1;
+always @(posedge clk_50) begin :thrust_ctrl
+	if (!reset_n) begin
+		dpad_thrust <= 8'd254;
+		thrust_counter <= 0;
+	end else begin
+		thrust_counter <= thrust_counter + 1'd1;
 
-	if (thrust_count == 'd196_850) begin
-		thrust_count <= 0;
-		if ((cont1_key_s[5] | cont2_key_s[5]) && dpad_thrust > 0)
-			dpad_thrust <= dpad_thrust - 1'd1;
+		if (thrust_counter == 'd196_850) begin
+			thrust_counter <= 0;
+			if ((cont1_key_s[5] | cont2_key_s[5]) && dpad_thrust < 'd254)
+				dpad_thrust <= dpad_thrust + 1'd1;
 
-		if ((cont1_key_s[4] | cont2_key_s[4]) && dpad_thrust < 'd254)
-			dpad_thrust <= dpad_thrust + 1'd1;
+			if ((cont1_key_s[4] | cont2_key_s[4]) && dpad_thrust > 0)
+				dpad_thrust <= dpad_thrust - 1'd1;
+		end
 	end
 end
 
